@@ -41,7 +41,7 @@ Median of steps taken per day : 10765
 ```r
 intv <- as.factor(activity.complete.df[, "interval"])
 intv.mean <- tapply(activity.complete.df[, "steps"], intv, mean)
-plot(x = unique(intv), y = intv.mean, type = "l")
+plot(x = unique(intv), y = intv.mean, type = "l", cex = 2)
 ```
 
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
@@ -89,17 +89,24 @@ daytype <- function(date.in) {
 activity.df <- cbind(activity.df, datetype = sapply(activity.df[, "date"], daytype))
 l <- split(activity.df, activity.df[, "datetype"])
 
+# Calculate weekday average of steps
+weekday.mean <- tapply(l[["weekday"]][, "steps"], as.factor(l[["weekday"]][, 
+    "interval"]), mean)
+# Calculate weekend average of steps
+weekend.mean <- tapply(l[["weekend"]][, "steps"], as.factor(l[["weekend"]][, 
+    "interval"]), mean)
 
-
-x <- as.factor(l[[1]][, "interval"])
-y <- tapply(l[[1]][, "steps"], x, mean)
+u <- data.frame(interval = rownames(weekend.mean), mean.steps = as.vector(weekend.mean), 
+    datetype = "weekend")
+v <- data.frame(interval = rownames(weekday.mean), mean.steps = as.vector(weekday.mean), 
+    datetype = "weekday")
+alldays.df <- rbind(u, v)
 
 
 library(lattice)
 
-
-f <- factor(activity.df[, "datetype"], labels = c("weekend", "weekday"))
-xyplot(y ~ unique(x) | f, layout = c(1, 2), type = "l", xlab = "Interval", ylab = "Steps")
+xyplot(mean.steps ~ interval | datetype, data = alldays.df, layout = c(1, 2), 
+    type = "l", xlab = "Interval", ylab = "Steps")
 ```
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
